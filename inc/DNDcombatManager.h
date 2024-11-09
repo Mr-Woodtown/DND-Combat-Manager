@@ -10,12 +10,12 @@
 
 //Die function prototypes
 //struct dice {
-int d4();
-int d6();
-int d8();
-int d10();
-int d12();
-int d20();
+int die4sided();
+int die6sided();
+int die8sided();
+int die10sided();
+int die12sided();
+int die20sided();
 
 //};
 
@@ -56,7 +56,7 @@ public:
 		return currentHitPoints;
 	}
 	int rollInitiative() {
-		int initiative = d20() + initMod;
+		int initiative = die20sided() + initMod;
 		return initiative;
 	}
 	int getAttackBonus() {
@@ -66,7 +66,7 @@ public:
 		currentHitPoints -= damage;
 	}		
 	void makeAttack(Monster r) {
-		int atkRoll = d20() + r.getAttackBonus();
+		int atkRoll = die20sided() + r.getAttackBonus();
 		std::cout << "The monster rolled a " << atkRoll << std::endl;
 		};
 		
@@ -88,13 +88,13 @@ public:
 
 //Full dice rolling functions
 
-int d4() {
+int die4sided() {
 	int total = 0;
 	srand(time(0));
 	total = 1 + rand() % 3;
 	return total;
 }
-int d4(int quantity) {
+int die4sided(int quantity) {
 	int total = 0;
 	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
@@ -103,13 +103,13 @@ int d4(int quantity) {
 	return total;
 }
 
-int d6() {
+int die6sided() {
 	int total = 0;
 	srand(time(0));
 	total = 1 + rand() % 5;
 	return total;
 }
-int d6(int quantity) {
+int die6sided(int quantity) {
 	int total = 0;
 	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
@@ -118,13 +118,13 @@ int d6(int quantity) {
 	return total;
 }
 
-int d8() {
+int die8sided() {
 	int total = 0;
 	srand(time(0));
 	total = 1 + rand() % 7;
 	return total;
 }
-int d8(int quantity) {
+int die8sided(int quantity) {
 	int total = 0;
 	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
@@ -133,13 +133,13 @@ int d8(int quantity) {
 	return total;
 }
 
-int d10() {
+int die10sided() {
 	int total = 0;
 	srand(time(0));
 	total = 1 + rand() % 9;
 	return total;
 }
-int d10(int quantity) {
+int die10sided(int quantity) {
 	int total = 0;
 	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
@@ -148,13 +148,13 @@ int d10(int quantity) {
 	return total;
 }
 
-int d12() {
+int die12sided() {
 	int total = 0;
 	srand(time(0));
 	total = 1 + rand() % 11;
 	return total;
 }
-int d12(int quantity) {
+int die12sided(int quantity) {
 	int total = 0;
 	for (int counter = 0; counter < quantity; counter++) {
 		total += 1 + rand() % 11;
@@ -164,13 +164,13 @@ int d12(int quantity) {
 
 //pointer for the d20 function
 
-int d20() {
+int die20sided() {
 	int total = 0;
 	srand(time(0));
 	total = 1 + rand() % 19;
 	return total;
 }
-int d20(int quantity) {
+int die20sided(int quantity) {
 	int total = 0;
 	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {

@@ -18,8 +18,8 @@ enum dice {d4 = 4, d6 = 6, d8 = 8, d10 = 10, d12 = 12, d20 = 20};
 int main(){
     srand(time(0));
 
-    cout << d6(4) << endl;
-    cout << d6() << endl;
+    cout << die6sided(4) << endl;
+    cout << die6sided() << endl;
 
 
     cout << "Which die would you like to roll? " << endl;
@@ -28,7 +28,7 @@ int main(){
     switch (whichDice) {
     case d4:
     case d6:
-        cout << "Your roll: " << d6() << endl;
+        cout << "Your roll: " << die6sided() << endl;
 
     default:
         cout << "That's not a valid number for a die in DND. " << endl << "Try again." << endl; 
