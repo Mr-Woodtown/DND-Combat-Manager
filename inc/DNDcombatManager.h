@@ -140,12 +140,25 @@ struct weapons {
 		wName(wName), weaponType(weaponType), type(type), damageDie(damageDie) {
 
 	};
+
+	//Overloading assignment operator
+	weapons& operator=(const weapons& C)
+	{
+		// Check for self-assignment
+		if (this != &C) {
+			wName = C.wName;
+			weaponType = C.weaponType;
+			type = C.type;
+			damageDie = C.damageDie;
+		}
+		return *this;
+	}
 };
 
 class Combatant {
 protected:
 	string name;
-	const int maxHitPoints;
+	int maxHitPoints;
 	int currentHitPoints;
 
 	int initiativeNumber;
@@ -167,6 +180,24 @@ public:
 	const int getMaxHitPoints() { return maxHitPoints; };
 	const string getName() { return name; };
 	const int getInitNumber() { return initiativeNumber; };
+
+
+	//Below is help from the internet atemting to do the same
+	// Assignment operator overload
+	Combatant& operator=(const Combatant& C)
+	{
+		// Check for self-assignment
+		if (this != &C) {
+			name = C.name;
+			maxHitPoints = C.maxHitPoints;
+			currentHitPoints = C.currentHitPoints;
+			initiativeNumber = C.initiativeNumber;
+		}
+		return *this;
+	}
+
+	friend void
+		switchCombatants(Combatant& combatant1, Combatant& combatant2);
 };
 
 class Monster : public Combatant{
@@ -180,16 +211,15 @@ private:
 
 public:
 	//Public methods	
-	const int rollInitiative() {
-		int initiative = die20sided() + initMod;
-		return initiative;
+	void rollInitiative() {
+		initiativeNumber = die20sided() + initMod;		
 	};
-	void makeAttack(Monster self) {
-		int atkRoll = die20sided() + self.getAttackBonus();
+	void makeAttack() {
+		int atkRoll = die20sided() + getAttackBonus();
 		std::cout << "The monster rolled a " << atkRoll << std::endl;
 	};
-	void tellDamage(Monster self) {
-		int damageRoll = rollDie(weapon.damageDie) + self.getAttackBonus();
+	void tellDamage() {
+		int damageRoll = rollDie(weapon.damageDie) + getAttackBonus();
 		std::cout << "The monster rolled " << damageRoll << " for damage." << std::endl;
 	};
 	//Functions for displaying attributes
@@ -201,7 +231,23 @@ public:
 	//create construtors
 	Monster() :weapon(), initMod(2), proficencyBonus(2), attackBonus(0), Combatant("Commoner", 10 , 10)  {};
 	Monster(string name, int max, weapons weapon, int initMod, int profBonus, int atkBonus) : weapon(weapon), initMod(initMod), proficencyBonus(profBonus), attackBonus(atkBonus),
-		Combatant(name, max, max) {	cout << "Your monster has been created. \n"; }
+		Combatant(name, max) {	cout << "Your monster has been created. \n"; }
+
+	Monster& operator=(const Monster& C)
+	{
+		// Check for self-assignment
+		if (this != &C) {
+			name = C.name;
+			maxHitPoints = C.maxHitPoints;
+			currentHitPoints = C.currentHitPoints;
+			initiativeNumber = C.initiativeNumber;
+			weapon = C.weapon;
+			initMod = C.initMod;
+			proficencyBonus = C.proficencyBonus;
+			attackBonus = C.attackBonus;
+		}
+		return *this;
+	}
 };
 
 class Player : public Combatant{
@@ -209,23 +255,38 @@ private:
 	
 public:
 	//constructors
-	Player(string name, int maxHP, int curHP, int initNum) : Combatant(name, maxHP, curHP, initNum) 
-		{ cout << "This player has been created with their initiative. \n\n"; };
-	Player(string name, int maxHP, int curHP) : Combatant(name, maxHP, curHP) { cout << "This player has been created. \n\n"; };
+
+	Player(string name, int maxHP, int curHP, int initNum) : Combatant(name, maxHP, curHP, initNum)
+	{cout << "This player has been created with their current hit points and initiative. \n\n";	
+	}
+	Player(string name, int maxHP, int curHP) : Combatant(name, maxHP, curHP, 0)
+	{
+		cout << "This player has been created with their current hit points. \n\n";
+	}
+	//Comented bellow doesn't work because the constructor above also has one string then two int. 
+	//Player(string name, int maxHP, int initNum) : Combatant(name, maxHP, initNum) 
+	//{ cout << "This player has been created with their initiative. \n\n"; 
+	//}
+	Player(string name, int maxHP) :  Combatant(name, maxHP) 
+	{ cout << "This player has been created. \n\n"; 
+	}
 	
 	//Functions for Player inputs
 	void rolledInit(int initiative) { 
 		initiativeNumber = initiative;
 	};
+	void enterCurrentHP(int currentHitpoints) {
+		currentHitPoints = currentHitpoints;
+	}
 };
 
 //I don't think I can implement initaitive management without an array.
-const int maxCombatants = 100;
+const int maxCombatants = 20;
 
-Combatant InitiativeArray[maxCombatants]; //I'm not really sure how I'll do this yet. 
+Combatant initiativeArray[maxCombatants]; //I'm not really sure how I'll do this yet. 
 
 //Logic for determining the order of initiatve. 
-int findArrayEnd() {
+int findArrayEnd(Combatant InitiativeArray[maxCombatants]) {
 	int index = 0;
 
 	while (InitiativeArray[index].getName() != "None") {
@@ -238,18 +299,33 @@ int findArrayEnd() {
 	return index;
 }
 
-void addCombatantToList(Combatant add) {
+void addCombatantToList(Combatant InitArray[maxCombatants], Combatant& add) {
 	//add the Combatant to the end of the list.
+	int index = findArrayEnd(InitArray);
+	// debug line 
+	cout << "This is the name of the array index: " << InitArray[index].getName() << endl;
+	InitArray[index] = add;
 };
 
-void determineOrder(Combatant InitArray[]) {
-	int numberOfCombatants = 0;
-	numberOfCombatants = findArrayEnd();
-	for (int counter = 0; counter < numberOfCombatants; counter++) {
-		//getInit;
+void switchMonsters(Monster& combatant1, Monster& combatant2){	
+	Monster temp;
+	temp = combatant1;
+	combatant1 = combatant2;
+	combatant2 = temp;
+}
+
+/*
+void determineOrder(Combatant InitArray[maxCombatants]) {
+	int numberOfCombatants = findArrayEnd(InitArray);
+	int index = 0;
+	while (InitArray[index].getName() != "None" && index > maxCombatants) {
+		if (InitArray[index].getInitNumber() < InitArray[index + 1].getInitNumber()) {
+			switchCombatants(InitArray[index], InitArray[index]);
+		}
+		index++;
 	}
 };
-
+*/
 
 //Full dice rolling functions
 
