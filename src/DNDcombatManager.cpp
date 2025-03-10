@@ -1,7 +1,9 @@
+
 #include <iostream>
-#include <ctime>
-#include <cstdlib>
 #include <string>
+#include <cstdlib>
+#include <ctime>
+
 //include customized .h file
 #include "DNDcombatManager.h"
 
@@ -17,39 +19,69 @@ weapons javalin("Javelin", "Thrown", piercing, d6);
 
 void askRoll() {
     dice thisDie;
-    cout << "Which die would you like to roll? (type the letter d then number of sides.)" << endl;
+    std::cout << "Which die would you like to roll? (type the letter d then number of sides.)" << endl;
     cin >> thisDie;
     whichDie(thisDie);
 };
 
 weapons defineWeapon() {
-    string dummyVar, weaponName, weaponType; //Why on earth do I need a dummy variable? Who knows, but it doesn't work without it. If I'm not mistaken it's memory should be deallocated outside of this scope. 
+    string weaponName, weaponType; //I had a dummy variable here as well but it looks like I don't need it anymore. Why did it not work before? Who knows?!
     damageType type;
     dice damageDie;
-    cout << "Please enter a name, weapon type (reaching, thrown, etc.), damage type (bludgening, slashing, or piercing), and die (d<#ofSides>). \nHit enter after each entry." << endl;
-    cin >> dummyVar >> weaponName >> weaponType >> type >> damageDie;
+    char yesNo = 'N';
+
+    std::cout << " \n\n Please enter a name and weapon type (reaching, thrown, etc.)\nHit enter after each entry.\n";
+    std::cout << " \n\n Please enter a name and weapon type (reaching, thrown, etc.)\nHit enter after each entry.\n";
+    do {        
+        cin >> weaponName >> weaponType;
+        cout << "You have entered " << weaponName << " for your weapon name and " << weaponType << " for your weapon's type. \nIs this what you wanted to enter? (Y/N) ";
+        cin >> yesNo;
+        if ((yesNo != 'Y') && (yesNo != 'y')) {
+            cout << "Please enter the name and weapon type (can be anyting without a spacebar) again \n";
+        }
+    } while ((yesNo != 'Y') && (yesNo != 'y'));
+
+    //Allow type verification without needing to type all the other attributes again.
+    cout << "Please enter a damage type (bludgening, slashing, or piercing).\n";
+    cin >> type;
+
+    yesNo = 'N';
+    cout << "Please enter a damage die (d<#ofSides>). (At the moment this program only supports a single damage die.) \n";
+    do {
+        cin >> damageDie;
+        cout << "You have entered " << weaponName << " for your weapon name and " << weaponType << " for your weapon's type. \nIs this what you wanted to enter? (Y/N) ";
+        cin >> yesNo;
+        if ((yesNo != 'Y') && (yesNo != 'y')) {
+            cout << "Please enter the name and weapon type (can be anyting without a spacebar) again \n";
+        }
+    } while ((yesNo != 'Y') && (yesNo != 'y'));
+     
+    cout << endl;
     weapons weapon1(weaponName, weaponType, type, damageDie);
     return weapon1;
 };
 
 void showWeapon(weapons aWeapon) {
     //maybe translate the enumerators back into their named values so they aren't displayed as just numbers. 
-    cout << "Your weapon's attributes are as follows: " << aWeapon.wName << ", " << aWeapon.weaponType << ", " << aWeapon.type << ", and " << aWeapon.damageDie << "." << endl;
+    std::cout << "Your weapon's attributes are as follows: " << aWeapon.wName << ", " << aWeapon.weaponType << ", " << aWeapon.type << ", and " << aWeapon.damageDie << "." << endl;
 }
 
 template <typename T>
 T verifyMonsterEntry(T monsterEntry) {
     //Control Flow variable
     char yesOrNo = 'N';
-    do {
-        cin >> monsterEntry;
-        cout << endl << "You have entered: " << monsterEntry <<  endl << endl;
-        cout << "Is this what you meant to enter? Y/N ";
-        cin >> yesOrNo;
-    } while (yesOrNo != 'Y');
     
+    do {cin >> monsterEntry;
+        std::cout << "\n" << "You have entered: " << monsterEntry << "\n" << endl;
+        std::cout << "Is this what you meant to enter? Y/N ";
+        cin >> yesOrNo;
+        if ((yesOrNo != 'Y') && (yesOrNo != 'y')) {
+            cout << "Please enter it again. \n";
+        }
+    } while ((yesOrNo != 'Y') && (yesOrNo != 'y'));
+    cout << endl;
     return monsterEntry;
-};
+}; 
 
 //Allows monsters to be created at runtime in a more human friendly format.
 Monster createMonster(){
@@ -62,30 +94,32 @@ Monster createMonster(){
     int attackBonus = 0;
     
 
-    cout << "What is the name of your monster?" << endl;
+    std::cout << "What is the name of your monster?" << endl;
     verifyMonsterEntry(monsterName);
-    cout << "What are your monster's maximum hitpoints?" << endl;
+    std::cout << "What are your monster's maximum hitpoints?" << endl;
     verifyMonsterEntry(maxHitPoints);
-    cout << "Give your monster a weapon.";
+    std::cout << "Give your monster a weapon. ";
     defineWeapon();
-    cout << "What is your monster's initiative modifier?" << endl;
+    std::cout << "What is your monster's initiative modifier?" << endl;
     verifyMonsterEntry(initMod);
-    cout << "What is your monster's profeciency bonus?" << endl;
+    std::cout << "What is your monster's profeciency bonus?" << endl;
     verifyMonsterEntry(profeciencyBonus);
-    cout << "What is your monster's attack bonus? "
+    std::cout << "What is your monster's attack bonus? "
       << "(This is added after your proficency bonus to get your attack modifier.)" << endl;
     verifyMonsterEntry(attackBonus);
-    Monster monster1(monsterName, maxHitPoints, genericWeapon, initMod, profeciencyBonus, attackBonus);
+    Monster monster1(monsterName, maxHitPoints, genericWeapon, initMod, profeciencyBonus, attackBonus);    
     return monster1;
 }
 
 //write this function
 //Combatant rollMonstersInitiave() {}
 
-void copyMonster(Monster aMonster) {
+void copyMonster(Monster aMonster, string ) {
     Monster monster2 = aMonster;
 }
 
+
+//This function is now replaced by overloading the assignment operator and calling the uncommented function copyMonster();
 /*
 void copyMonster(Monster aMonster, int numberOfCopies) {
     int monsterNumber;
@@ -99,53 +133,122 @@ void copyMonster(Monster aMonster, int numberOfCopies) {
 };
 */
 
-void displayInitiativeOrder(Combatant InitArray[maxCombatants]) {    
-    for (int index = 0; index < findArrayEnd(InitArray); index++) {
-        cout << InitArray[index].getName() << " is " << index + 1 << " in initiative order." << endl;
-    }
-    cout << " ";
-}
-
+//A vector might be easier to impliment than an array for a later verison
 int main() {
     srand(time(0));
-    //Monster creation This step is done manually in this version but in future versions this will be part of the game logic as well. See 2nd cout bellow and the createMonster() function. 
-    Combatant nullDefault;
+    //Monster creation This step is done manually in this version but in future versions this will be part of the game logic as well. See 2nd std::cout bellow and the createMonster() function.     
     Monster monster1("Orc 1", 15, greatAxe, 1, 2, 3);
-    Monster monster2("Orc 2", 15, javalin, 1, 2, 3);
-    Monster monster3("Orc 3", 15, javalin, 1, 2, 3);
-    Monster monster4("Orc 4", 15, javalin, 1, 2, 3);
+    Monster monster2("Orc 2", 15, javalin,  1, 2, 3);
+    Monster monster3("Orc 3", 15, javalin,  1, 2, 3);
+    Monster monster4("Orc 4", 15, javalin,  1, 2, 3);
+    const int numberOfMonsters = 4;
     Player player1("One-Shoe", 39);
     Player player2("Stumble Duck", 42);
     Player player3("Drungeon", 54);
+    const int numberOfPlayers = 3;
+
+    //cout << "This should be a sequece of random numbers from 1 to 20." << '\n' << die20sided() << ' ' << die20sided() << ' ' << die20sided() << '\n' << "It is clearly not." << endl; \\It is now! ;)
+
 
     //game logic
-    cout << "Hello, and welcome to DND Combat manager created by Cayden Wootton." << endl;
-    cout << "Please start by defining the monsters for your encounter." << endl << endl;
+    std::cout << "\nHello, and welcome to DND Combat manager created by Cayden Wootton." << endl;
+    //std::cout << "Please start by defining the monsters for your encounter." << '\n' << endl;
 
-    //Begin Combat   
-    Combatant InitiativeArray[maxCombatants] = { monster1, monster2, monster3, monster4, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault, nullDefault };
-    //Roll Monster Initiative
-    monster1.rollInitiative();
-    cout << "Monster " << monster1.getName() << " has the initiative number of " << monster1.getInitNumber() << "." << endl;
-    monster2.rollInitiative();
-    monster3.rollInitiative();
-    monster4.rollInitiative();
-    switchCombatants(monster1, monster2);
-    cout << "Monster " << monster1.getName() << " has the initiative number of " << monster1.getInitNumber() << "." << endl;
-    displayInitiativeOrder(InitiativeArray);
-    //Organize Initiative
-    //determineOrder(InitiativeArray);
-    //displayInitiativeOrder(InitiativeArray);
+    //Begin Combat
+    
+    
+    std::cout << "How many monsters do you want to have?" << endl;
+    cin >> numberOfCombatants;//Provides size of the array.
+    if (numberOfCombatants < maxCombatants) {
+    Combatant* monsterInitiativeArray = new Monster[numberOfCombatants];
+    }
+    else {
+        std::cout << "The number of monsters cannot be handeled by this program. \nPlease restart the program and try again. \n\n\n\n\n";
+    }
+    int numberOfCombatants = numberOfMonsters + numberOfPlayers;
 
-
-    cout << "Enter player's intiatives." << endl;
-
-    //Debugging line: cout << "The end of the array is: " << findArrayEnd(InitiativeArray) << endl;
+    Combatant* playerInitiativeArray = new Player[numberOfPlayers];
     
 
+    //Roll Monster Initiative
+    monster1.setInitiative();
+    monster2.setInitiative();
+    monster3.setInitiative();
+    //monster4.setInitiative();
+
+
+    Combatant* monsterInitiativeArray[numberOfMonsters] = {&monster1, &monster2, &monster3, &monster4};
+    //Debugging line: std::cout << "The end of the array is: " << findArrayEnd(InitiativeArray) << endl;
+    cout << "These are " << endl;
+    for (int indexCounter = 0; indexCounter < numberOfMonsters; indexCounter++) {
+        cout << monsterInitiativeArray[indexCounter]->getName() << '\n';
+    }
+    cout << endl;
+
+    
+    ///*
+    //void determineMonsterOrder(Combatant* initArray[4])  
+    cout << "These are the first two in the array." << endl;
+    cout << monsterInitiativeArray[0]->getName() << " has an initiative of " << monsterInitiativeArray[0]->getInitNumber() << " and " 
+        << monsterInitiativeArray[1]->getName() << " has an initiative of " << monsterInitiativeArray[1]->getInitNumber() << "." << endl;
+    cout << "Sorting things. " << endl;
+    if (monsterInitiativeArray[0]->getInitNumber() < monsterInitiativeArray[1]->getInitNumber()) {
+        //swap the order in the array
+        Combatant* temp = monsterInitiativeArray[0];
+        monsterInitiativeArray[0] = monsterInitiativeArray[1];
+        monsterInitiativeArray[1] = temp;
+    }
+    cout << "Now that is sorted lets see how we're doing." << endl;
+    cout << monsterInitiativeArray[0]->getName() << " has an initiative of " << monsterInitiativeArray[0]->getInitNumber() << " and "
+        << monsterInitiativeArray[1]->getName() << " has an initiative of " << monsterInitiativeArray[1]->getInitNumber() << "." << endl;
+    //*/
+
+    ///*
+    for (int timesThroughArray = 0; timesThroughArray < numberOfMonsters - 1; timesThroughArray++) {
+        for (int indexCounter = 0; indexCounter < numberOfMonsters - 1; indexCounter++) {
+            if (monsterInitiativeArray[indexCounter]->getInitNumber() < monsterInitiativeArray[indexCounter + 1]->getInitNumber()) {
+                //swap the order in the array
+                Combatant* temp = monsterInitiativeArray[indexCounter];
+                monsterInitiativeArray[indexCounter] = monsterInitiativeArray[indexCounter + 1];
+                monsterInitiativeArray[indexCounter + 1] = temp;
+            }
+        }  
+    };
+    cout << '\n' << monsterInitiativeArray[0]->getName() << '\n'
+    << monsterInitiativeArray[1]->getName() << '\n'
+    << monsterInitiativeArray[2]->getName() << '\n'
+    << monsterInitiativeArray[3]->getName() << endl;
+    //*/
+
+    
+    std::cout << "Enter player's intiatives." << endl;
+    player1.setInitiative();
+    player2.setInitiative();
+    player3.setInitiative();
+    
+
+    
+    //Possible Round logic
 
     //Turn logic
-    //cout << "Did the monster take damage? (Y/N)";
+    /*
+    char playerBeforeMonster = 'N';
+    char aMonsterDamage;
+    while(playerBeforeMonster != ('Y' && 'y')) {
+    std::cout << "Does a player go before this monster? (Y/N)";
+    cin >> playerBeforeMonster;
+    if (playerBeforeMonster != 'Y') {
+        break;
+        }
+    //do subroutine
+    //access any monster
+    std::cout << "Did the monster take damage? (Y/N)";
+    }
+    */
 
+
+
+    //Deallocate array memory
+    
     return 0;
 }

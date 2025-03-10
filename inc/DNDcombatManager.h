@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
@@ -163,15 +164,20 @@ protected:
 
 	int initiativeNumber;
 public:
+	//Constructors
 	Combatant() : name("None"), initiativeNumber(0), maxHitPoints(0), currentHitPoints(0) {};
 	Combatant(string name) : initiativeNumber(0), name(name), maxHitPoints(10), currentHitPoints(maxHitPoints) {};
 	Combatant(string name, int max) : name(name), maxHitPoints(max), currentHitPoints(max), initiativeNumber(0) {};
 	Combatant(string name, int max, int initiative) : name(name), maxHitPoints(max), currentHitPoints(max), initiativeNumber(initiative) {};
 	Combatant(string name, int max, int curHP, int initiative) : name(name), maxHitPoints(max), currentHitPoints(curHP), initiativeNumber(initiative) {};
 
-	void setIntative(int initiativeRoll, int initiativeMod) {
-		initiativeNumber = initiativeRoll + initiativeMod;
-	}
+	//Destructors // Professor provided code template
+	//~Combatant() = ;// deal with later in each child class (subclass)
+	virtual ~Combatant() = default;//Virtual Destructor
+
+	//Common methods of Monster and Player
+	virtual void setInitiative() = 0;
+
 	void tookDamage(int damage) {
 		currentHitPoints -= damage;
 	};
@@ -180,7 +186,6 @@ public:
 	const int getMaxHitPoints() { return maxHitPoints; };
 	const string getName() { return name; };
 	const int getInitNumber() { return initiativeNumber; };
-
 
 	//Below is help from the internet atemting to do the same
 	// Assignment operator overload
@@ -196,9 +201,16 @@ public:
 		return *this;
 	}
 
-	friend void
-		switchCombatants(Combatant& combatant1, Combatant& combatant2);
+	//dispay function wich subclasses will be able to redefine. //Professor provided code template
+	virtual void display() const = 0; //Pure virtual function; I'm not exactly sure what that means.
 };
+
+// overload the << operator so that it just displays the name of the combantant
+//displaying all info should be handled by calling the virtual "display()" function
+std::ostream& operator<<(std::ostream& os, Combatant& thisObject) {
+	os << thisObject.getName();
+	return os;
+}
 
 class Monster : public Combatant{
 private:
@@ -211,8 +223,14 @@ private:
 
 public:
 	//Public methods	
-	void rollInitiative() {
-		initiativeNumber = die20sided() + initMod;		
+	int  rollInitiative() {
+		return die20sided() + initMod;		
+	};
+	void setInitiative() {
+		initiativeNumber = rollInitiative();
+	}
+	void setInitiative(int inNum) {
+		initiativeNumber = inNum;
 	};
 	void makeAttack() {
 		int atkRoll = die20sided() + getAttackBonus();
@@ -227,12 +245,32 @@ public:
 	const int getProfBonus() { return proficencyBonus; };
 	const int getAttackBonus() { return attackBonus; };
 	const int getInitMod() { return initMod; };
-	 
+	
+	//Display all attributes
+	void display() const override {
+		cout << "These are " << name << "'s attributes." << endl <<
+			"Maximum hitpoints: " << maxHitPoints << endl <<
+			"Current hitpoints: " << currentHitPoints << endl <<
+			"Initiative roll: " << initiativeNumber << endl <<
+			"Weapon info: " << endl <<
+			"	Weapon name " << weapon.wName << endl <<
+			"	Damage die " << weapon.damageDie << endl << 
+			"	Damage type " << weapon.weaponType << endl << 
+			"	Weapon type (user defined) " << weapon.type << endl << 
+			"Initiative modifier: " << initMod << endl <<
+			"Proficency bonus: " << proficencyBonus << endl <<
+			"Attack bonus: " << attackBonus << endl;
+	}
+
 	//create construtors
 	Monster() :weapon(), initMod(2), proficencyBonus(2), attackBonus(0), Combatant("Commoner", 10 , 10)  {};
 	Monster(string name, int max, weapons weapon, int initMod, int profBonus, int atkBonus) : weapon(weapon), initMod(initMod), proficencyBonus(profBonus), attackBonus(atkBonus),
-		Combatant(name, max) {	cout << "Your monster has been created. \n"; }
+		Combatant(name, max) { cout << "Your monster has been created. " << endl; }
+	
+	// Create destructors
+	~Monster() { cout << name << " has been destroyed." << endl;}
 
+	//Overload the assignment opperator
 	Monster& operator=(const Monster& C)
 	{
 		// Check for self-assignment
@@ -250,12 +288,13 @@ public:
 	}
 };
 
+
 class Player : public Combatant{
 private:
 	
 public:
 	//constructors
-
+	Player() : Combatant() {}
 	Player(string name, int maxHP, int curHP, int initNum) : Combatant(name, maxHP, curHP, initNum)
 	{cout << "This player has been created with their current hit points and initiative. \n\n";	
 	}
@@ -268,27 +307,38 @@ public:
 	//{ cout << "This player has been created with their initiative. \n\n"; 
 	//}
 	Player(string name, int maxHP) :  Combatant(name, maxHP) 
-	{ cout << "This player has been created. \n\n"; 
+	{ cout << "This player has been created. \n"; 
 	}
-	
+
+	//Destructors
+	~Player() {}
+
 	//Functions for Player inputs
-	void rolledInit(int initiative) { 
+	void setInitiative() { 
+		int initiative;
+		cout << "What is " << getName() << "'s rolled initiative? " << endl;
+		cin >> initiative;
 		initiativeNumber = initiative;
 	};
 	void enterCurrentHP(int currentHitpoints) {
 		currentHitPoints = currentHitpoints;
 	}
+	void display() const override{
+		cout << "These are " <<  name << "'s attributes."<< '\n' <<
+			"Maximum hitpoints: " << maxHitPoints << '\n' <<
+			"Current hitpoints: " << currentHitPoints << '\n' <<
+			"Initiative roll: " << initiativeNumber << endl;
+	}
 };
 
-//I don't think I can implement initaitive management without an array.
-const int maxCombatants = 20;
+//I don't think I can implement initaitive management without an array.//I later tried to use an array. It broke my brain and I needed help from my professor.//The new implentaion took the help of Claude.ai to work. 
+const int maxCombatants = 100;
 
-Combatant initiativeArray[maxCombatants]; //I'm not really sure how I'll do this yet. 
+Combatant* InitiativeArray[maxCombatants]; 
 
-//Logic for determining the order of initiatve. 
-int findArrayEnd(Combatant InitiativeArray[maxCombatants]) {
+//Logic for determining the order of initiatve. //All of this needs to be rewritten. 
+int findArrayEnd(Combatant* InitiativeArray[maxCombatants]); /* {
 	int index = 0;
-
 	while (InitiativeArray[index].getName() != "None") {
 		if (index >= maxCombatants) {
 			break;
@@ -298,46 +348,18 @@ int findArrayEnd(Combatant InitiativeArray[maxCombatants]) {
 
 	return index;
 }
-
-void addCombatantToList(Combatant InitArray[maxCombatants], Combatant& add) {
-	//add the Combatant to the end of the list.
-	int index = findArrayEnd(InitArray);
-	// debug line 
-	cout << "This is the name of the array index: " << InitArray[index].getName() << endl;
-	InitArray[index] = add;
-};
-
-void switchMonsters(Monster& combatant1, Monster& combatant2){	
-	Monster temp;
-	temp = combatant1;
-	combatant1 = combatant2;
-	combatant2 = temp;
-}
-
-/*
-void determineOrder(Combatant InitArray[maxCombatants]) {
-	int numberOfCombatants = findArrayEnd(InitArray);
-	int index = 0;
-	while (InitArray[index].getName() != "None" && index > maxCombatants) {
-		if (InitArray[index].getInitNumber() < InitArray[index + 1].getInitNumber()) {
-			switchCombatants(InitArray[index], InitArray[index]);
-		}
-		index++;
-	}
-};
 */
+
 
 //Full dice rolling functions
 
 int die4sided() {
 	int total = 0;
-	srand(time(0));
 	total = 1 + rand() % 3;
 	return total;
 }
 int die4sided(int quantity) {
 	int total = 0;
-	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
 		total += 1 + rand() % 3;
 	}
@@ -346,13 +368,11 @@ int die4sided(int quantity) {
 
 int die6sided() {
 	int total = 0;
-	srand(time(0));
 	total = 1 + rand() % 5;
 	return total;
 }
 int die6sided(int quantity) {
 	int total = 0;
-	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
 		total += 1 + rand() % 5;
 	}
@@ -361,13 +381,11 @@ int die6sided(int quantity) {
 
 int die8sided() {
 	int total = 0;
-	srand(time(0));
 	total = 1 + rand() % 7;
 	return total;
 }
 int die8sided(int quantity) {
 	int total = 0;
-	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
 		total += 1 + rand() % 7;
 	}
@@ -376,13 +394,11 @@ int die8sided(int quantity) {
 
 int die10sided() {
 	int total = 0;
-	srand(time(0));
 	total = 1 + rand() % 9;
 	return total;
 }
 int die10sided(int quantity) {
 	int total = 0;
-	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
 		total += 1 + rand() % 9;
 	}
@@ -391,7 +407,6 @@ int die10sided(int quantity) {
 
 int die12sided() {
 	int total = 0;
-	srand(time(0));
 	total = 1 + rand() % 11;
 	return total;
 }
@@ -405,13 +420,13 @@ int die12sided(int quantity) {
 
 int die20sided() {
 	int total = 0;
-	srand(time(0));
+	//srand(time(0)); //Apperently when you add this line, for some reason it gives you the same number in each scope. 
+	// Probably has something to do with the way cstdlib works under the hood. 
 	total = 1 + rand() % 19;
 	return total;
 }
 int die20sided(int quantity) {
 	int total = 0;
-	srand(time(0));
 	for (int counter = 0; counter < quantity; counter++) {
 		total += 1 + rand() % 19;
 	}
